@@ -5,6 +5,7 @@
 // This file is run as part of a reduced test set in CI on Mac and Windows
 // machines.
 @Tags(<String>['reduced-test-set'])
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -438,7 +439,7 @@ void main() {
         home: Scaffold(
           body: Builder(
             builder: (BuildContext context) {
-              width = MediaQuery.of(context).size.width;
+              width = MediaQuery.sizeOf(context).width;
               return CustomScrollView(
                 slivers: <Widget>[
                   SliverAppBar(
@@ -464,18 +465,16 @@ void main() {
       ),
     );
 
+    final double textWidth = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? width
+      : (width / 1.5).floorToDouble() * 1.5;
     // The title is scaled and transformed to be 1.5 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 1.5 times smaller than the full width. The height of the text is the same
     // as the font size, with 10 dps bottom margin.
     expect(
       tester.getRect(find.byType(Text)),
-      Rect.fromLTRB(
-        0,
-        height - titleFontSize - 10,
-        (width / 1.5).floorToDouble() * 1.5,
-        height,
-      ),
+      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - 10, textWidth, height), epsilon: 0.0001),
     );
   });
 
@@ -536,18 +535,16 @@ void main() {
     // bottom edge.
     const double bottomMargin = titleFontSize * (expandedTitleScale - 1);
 
+    final double textWidth = const bool.hasEnvironment('SKPARAGRAPH_REMOVE_ROUNDING_HACK')
+      ? collapsedWidth
+      : (collapsedWidth / 3).floorToDouble() * 3;
     // The title is scaled and transformed to be 3 times bigger, when the
     // FlexibleSpaceBar is fully expanded, thus we expect the width to be
     // 3 times smaller than the full width. The height of the text is the same
     // as the font size, with 40 dps bottom margin to maintain its bottom position.
     expect(
       tester.getRect(title),
-      Rect.fromLTRB(
-        0,
-        height - titleFontSize - bottomMargin,
-        (collapsedWidth / 3).floorToDouble() * 3,
-        height,
-      ),
+      rectMoreOrLessEquals(Rect.fromLTRB(0, height - titleFontSize - bottomMargin, textWidth, height), epsilon: 0.0001),
     );
   });
 

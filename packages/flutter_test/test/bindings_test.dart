@@ -7,14 +7,14 @@
 // https://github.com/flutter/flutter/issues/85160
 // Fails with "flutter test --test-randomize-ordering-seed=20210721"
 @Tags(<String>['no-shuffle'])
+library;
+
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
 
 void main() {
   final AutomatedTestWidgetsFlutterBinding binding = AutomatedTestWidgetsFlutterBinding();
@@ -28,7 +28,7 @@ void main() {
 
   group(AutomatedTestWidgetsFlutterBinding, () {
     test('allows setting defaultTestTimeout to 5 minutes', () {
-      binding.defaultTestTimeout = const test_package.Timeout(Duration(minutes: 5));
+      binding.defaultTestTimeout = const Timeout(Duration(minutes: 5));
       expect(binding.defaultTestTimeout.duration, const Duration(minutes: 5));
     });
   });
@@ -89,5 +89,14 @@ void main() {
       expect(binding.clock.now(), beforeTime.add(const Duration(seconds: 1)));
       binding.idle();
     });
+  });
+
+  testWidgets('Assets in the tester can be loaded without turning event loop', (WidgetTester tester) async {
+    bool responded = false;
+    // The particular asset does not matter, as long as it exists.
+    rootBundle.load('AssetManifest.json').then((ByteData data) {
+      responded = true;
+    });
+    expect(responded, true);
   });
 }
